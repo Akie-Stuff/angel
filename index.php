@@ -1,157 +1,159 @@
-<?php 
-session_start();
-$connect = mysqli_connect("localhost", "root", "", "azarine");
+<?php
+// Nama file JSON untuk menyimpan data pengguna
+$file = 'users.json';
 
-if(isset($_POST["add_to_cart"]))
-{
-	if(isset($_SESSION["shopping_cart"]))
-	{
-		$item_array_id = array_column($_SESSION["shopping_cart"], "id");
-		if(!in_array($_GET["id"], $item_array_id))
-		{
-			$count = count($_SESSION["shopping_cart"]);
-			$item_array = array(
-				'id'			=>	$_GET["id"],
-				'product_name'			=>	$_POST["hidden_name"],
-				'product_price'		=>	$_POST["hidden_price"],
-				'product_quantity'		=>	$_POST["quantity"]
-			);
-			$_SESSION["shopping_cart"][$count] = $item_array;
-		}
-		else
-		{
-			echo '<script>alert("Item Already Added")</script>';
-		}
-	}
-	else
-	{
-		$item_array = array(
-			'id'			=>	$_GET["id"],
-			'product_name'			=>	$_POST["hidden_name"],
-			'product_price'		=>	$_POST["hidden_price"],
-			'product_quantity'		=>	$_POST["quantity"]
-		);
-		$_SESSION["shopping_cart"][0] = $item_array;
-	}
+// Pastikan file JSON ada, jika tidak buat file kosong
+if (!file_exists($file)) {
+    file_put_contents($file, json_encode([]));
 }
 
-if(isset($_GET["action"]))
-{
-	if($_GET["action"] == "delete")
-	{
-		foreach($_SESSION["shopping_cart"] as $keys => $values)
-		{
-			if($values["id"] == $_GET["id"])
-			{
-				unset($_SESSION["shopping_cart"][$keys]);
-				echo '<script>alert("Item Removed")</script>';
-				echo '<script>window.location="index.php"</script>';
-			}
-		}
-	}
+// Fungsi untuk membaca data pengguna dari file JSON
+function getUsers() {
+    global $file;
+    return json_decode(file_get_contents($file), true);
 }
 
+// Fungsi untuk menyimpan data pengguna ke file JSON
+function saveUsers($users) {
+    global $file;
+    file_put_contents($file, json_encode($users, JSON_PRETTY_PRINT));
+}
+
+// Proses Login
+if (isset($_POST['action']) && $_POST['action'] === 'login') {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    $users = getUsers();
+
+    foreach ($users as $user) {
+        if ($user['email'] === $email && password_verify($password, $user['password'])) {
+            echo "Login berhasil! Selamat datang, {$user['name']}!";
+            exit;
+        }
+    }
+    echo "Login gagal! Email atau password salah.";
+}
+
+// Proses Register
+if (isset($_POST['action']) && $_POST['action'] === 'register') {
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $users = getUsers();
+
+    foreach ($users as $user) {
+        if ($user['email'] === $email) {
+            echo "Registrasi gagal! Email sudah terdaftar.";
+            exit;
+        }
+    }
+
+    $users[] = [
+        'name' => $name,
+        'email' => $email,
+        'password' => $password,
+    ];
+
+    saveUsers($users);
+    echo "Registrasi berhasil! Silakan login.";
+    exit;
+}
 ?>
+
 <!DOCTYPE html>
-<html>
-	<head>
-		<title>Azarine Official Shop</title>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-		<link rel="stylesheet" href="styleblog.css">
-	</head>
-	<body>
-
-		<a href="index.html" class="btn ">Go Back</a>
-
-		<br />
-		<div class="container">
-			<br />
-			<br />
-			<br />
-			<h3 align="center">Azarine Shop Official</h3><br />
-			<br /><br />
-			<?php
-				$query = "SELECT * FROM produk ORDER BY id ASC";
-				$result = mysqli_query($connect, $query);
-				if(mysqli_num_rows($result) > 0)
-				{
-					while($row = mysqli_fetch_array($result))
-					{
-				?>
-
-			<div class="col-md-4">
-				<form method="post" action="index.php?action=add&id=<?php echo $row["id"]; ?>">
-					<div style="border:1px solid #333; background-color:#f1f1f1; border-radius:5px; padding:16px;" align="center">
-						<img src="uploaded_img/<?php echo $row["image"]; ?>" class="img-responsive" /><br />
-
-						<h4 class="text-info"><?php echo $row["name"]; ?></h4>
-
-						<h4 class="text-danger">idr <?php echo $row["price"]; ?></h4>
-
-						<input type="text" name="quantity" value="1" class="form-control" />
-
-						<input type="hidden" name="hidden_name" value="<?php echo $row["name"]; ?>" />
-
-						<input type="hidden" name="hidden_price" value="<?php echo $row["price"]; ?>" />
-
-						<input type="submit" name="add_to_cart" style="margin-top:5px;" class="btn btn-success" value="Add to Cart" />
-
-					</div>
-				</form>
-			</div>
-			<?php
-					}
-				}
-			?>
-			<div style="clear:both"></div>
-			<br />
-			<h3>Order Details</h3>
-			<div class="table-responsive">
-				<table class="table table-bordered">
-					<tr>
-						<th width="40%">Item Name</th>
-						<th width="10%">Quantity</th>
-						<th width="20%">Price</th>
-						<th width="15%">Total</th>
-						<th width="5%">Action</th>
-					</tr>
-					<?php
-					if(!empty($_SESSION["shopping_cart"]))
-					{
-						$total = 0;
-						foreach($_SESSION["shopping_cart"] as $keys => $values)
-						{
-					?>
-					<tr>
-						<td><?php echo $values["product_name"]; ?></td>
-						<td><?php echo $values["product_quantity"]; ?></td>
-						<td>idr <?php echo $values["product_price"]; ?></td>
-						<td>idr <?php echo number_format($values["product_quantity"] * $values["product_price"], 2);?></td>
-						<td><a href="index.php?action=delete&id=<?php echo $values["id"]; ?>"><span class="text-danger">Remove</span></a></td>
-					</tr>
-					<?php
-							$total = $total + ($values["product_quantity"] * $values["product_price"]);
-						}
-					?>
-					<tr>
-						<td colspan="3" align="right">Total</td>
-						<td align="right">idr <?php echo number_format($total, 2); ?></td>
-						<td></td>
-					</tr>
-					<?php
-					}
-					?>
-						
-				</table>
-			</div>
-		</div>
-	</div>
-	<br />
-	</body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Register</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .toggle {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .toggle a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <?php if (!isset($_GET['action']) || $_GET['action'] === 'login'): ?>
+            <!-- Halaman Login -->
+            <h1>Login</h1>
+            <form method="POST">
+                <input type="hidden" name="action" value="login">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+                <button type="submit">Login</button>
+            </form>
+            <div class="toggle">
+                Belum punya akun? <a href="?action=register">Daftar di sini</a>
+            </div>
+        <?php else: ?>
+            <!-- Halaman Register -->
+            <h1>Register</h1>
+            <form method="POST">
+                <input type="hidden" name="action" value="register">
+                <label for="name">Nama</label>
+                <input type="text" id="name" name="name" required>
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+                <button type="submit">Register</button>
+            </form>
+            <div class="toggle">
+                Sudah punya akun? <a href="?action=login">Login di sini</a>
+            </div>
+        <?php endif; ?>
+    </div>
+</body>
 </html>
 
-<?php
-
-?>
