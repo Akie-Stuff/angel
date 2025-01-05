@@ -1,17 +1,22 @@
 <?php
 session_start();
 
-// File JSON dengan data pengguna
-$usersFile = '/users.json';
-
-// Fungsi untuk mendapatkan data pengguna
-function getUsers($file) {
-    return json_decode(file_get_contents($file), true);
-}
+// Data pengguna (hardcoded)
+$users = [
+    [
+        "username" => "admin",
+        "password" => "admin123",
+        "role" => "admin"
+    ],
+    [
+        "username" => "user",
+        "password" => "user123",
+        "role" => "user"
+    ]
+];
 
 // Fungsi untuk login
-function login($username, $password, $file) {
-    $users = getUsers($file);
+function login($username, $password, $users) {
     foreach ($users as $user) {
         if ($user['username'] === $username && $user['password'] === $password) {
             return $user;
@@ -31,7 +36,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
-    $user = login($username, $password, $usersFile);
+    $user = login($username, $password, $users);
 
     if ($user) {
         $_SESSION['user'] = $user;
@@ -58,134 +63,74 @@ if (!isset($_SESSION['user']) && $page !== 'login') {
 }
 
 // Render halaman
-if ($page === 'login'): ?>
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Login</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                background-color: #f0f0f0;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-            }
-            .login-container {
-                background: white;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                width: 300px;
-            }
-            .login-container h1 {
-                margin-bottom: 20px;
-                text-align: center;
-            }
-            .login-container input[type="text"],
-            .login-container input[type="password"] {
-                width: 100%;
-                padding: 10px;
-                margin-bottom: 10px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-            }
-            .login-container button {
-                width: 100%;
-                padding: 10px;
-                background-color: #007BFF;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-            }
-            .login-container button:hover {
-                background-color: #0056b3;
-            }
-            .error {
-                color: red;
-                text-align: center;
-                margin-bottom: 10px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="login-container">
-            <h1>Login</h1>
-            <?php if (!empty($error)): ?>
-                <div class="error"><?= $error ?></div>
-            <?php endif; ?>
-            <form method="POST">
-                <input type="text" name="username" placeholder="Username" required>
-                <input type="password" name="password" placeholder="Password" required>
-                <button type="submit" name="login">Login</button>
-            </form>
-        </div>
-    </body>
-    </html>
-
-<?php elseif ($page === 'admin'): ?>
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Admin Page</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                background-color: #333;
-                color: white;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                flex-direction: column;
-            }
-            a {
-                color: #007BFF;
-                text-decoration: none;
-                margin-top: 20px;
-            }
-        </style>
-    </head>
-    <body>
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= ucfirst($page) ?> Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        h1 {
+            color: #333;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: white;
+            background: #007BFF;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+        a:hover {
+            background: #0056b3;
+        }
+        .error {
+            color: red;
+        }
+        form input {
+            margin: 10px 0;
+            padding: 10px;
+            width: 200px;
+        }
+        form button {
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        form button:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <?php if ($page === 'login'): ?>
+        <h1>Login</h1>
+        <?php if (!empty($error)): ?>
+            <div class="error"><?= $error ?></div>
+        <?php endif; ?>
+        <form method="POST">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit" name="login">Login</button>
+        </form>
+    <?php elseif ($page === 'admin'): ?>
         <h1>Welcome, Admin!</h1>
+        <p>Ini adalah halaman admin.</p>
         <a href="?action=logout">Logout</a>
-    </body>
-    </html>
-
-<?php elseif ($page === 'user'): ?>
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>User Page</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                background-color: #4CAF50;
-                color: white;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                flex-direction: column;
-            }
-            a {
-                color: #007BFF;
-                text-decoration: none;
-                margin-top: 20px;
-            }
-        </style>
-    </head>
-    <body>
+    <?php elseif ($page === 'user'): ?>
         <h1>Welcome, User!</h1>
+        <p>Ini adalah halaman user biasa.</p>
         <a href="?action=logout">Logout</a>
-    </body>
-    </html>
-<?php endif; ?>
+    <?php endif; ?>
+</body>
+</html>
