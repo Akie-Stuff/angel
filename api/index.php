@@ -2,7 +2,7 @@
 session_start();
 
 // File JSON dengan data pengguna
-$usersFile = 'users.json';
+$usersFile = '/users.json';
 
 // Fungsi untuk mendapatkan data pengguna
 function getUsers($file) {
