@@ -179,9 +179,10 @@ if (!isset($_SESSION['user']) && in_array($page, ['admin', 'user'])) {
         <?php elseif ($page === 'gallery'): ?>
             <h1>Gallery</h1>
             <div class="gallery">
-               <img src="https://unsplash.com/photos/a-woman-holding-a-game-controller-in-front-of-a-body-of-water-oossuuikJkg&q=80&w=400" alt="Game 1">
-<img src="https://images.unsplash.com/photo-1610966015015-c8e46797d9b2?crop=entropy&cs=tinysrgb&fit=max&ixid=MnwzNjQ3OXwwfDF8c2VhcmNofDMyfHxnYW1lfGVufDB8fHx8fDE2NzkyMTk4NjE&ixlib=rb-1.2.1&q=80&w=400" alt="Game 2">
-<img src="https://images.unsplash.com/photo-1617738047590-925d18b34e2a?crop=entropy&cs=tinysrgb&fit=max&ixid=MnwzNjQ3OXwwfDF8c2VhcmNofDYyfHxnYW1lfGVufDB8fHx8fDE2NzkyMTk4NzI&ixlib=rb-1.2.1&q=80&w=400" alt="Game 3">
+             <img src="https://via.placeholder.com/300x200/4e73df/ffffff?text=Game+1" alt="Game 1">
+<img src="https://via.placeholder.com/300x200/4e73df/ffffff?text=Game+2" alt="Game 2">
+<img src="https://via.placeholder.com/300x200/4e73df/ffffff?text=Game+3" alt="Game 3">
+
 
             </div>
         <?php elseif ($page === 'content'): ?>
