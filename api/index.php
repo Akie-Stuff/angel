@@ -1,6 +1,6 @@
 <?php
 session_start();
-
+ 
 // Data pengguna (hardcoded)
 $users = [
     [
@@ -14,7 +14,7 @@ $users = [
         "role" => "user"
     ]
 ];
-
+ 
 // Fungsi untuk login
 function login($username, $password, $users) {
     foreach ($users as $user) {
@@ -24,20 +24,20 @@ function login($username, $password, $users) {
     }
     return null;
 }
-
+ 
 // Proses logout
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     session_destroy();
     header('Location: ?page=dashboard');
     exit();
 }
-
+ 
 // Proses login
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
     $user = login($username, $password, $users);
-
+ 
     if ($user) {
         $_SESSION['user'] = $user;
         // Redirect ke halaman sesuai role
@@ -52,16 +52,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
         $error = "Username atau password salah!";
     }
 }
-
+ 
 // Halaman yang diminta
 $page = $_GET['page'] ?? 'dashboard';
-
+ 
 // Jika user tidak login, arahkan ke halaman login untuk admin/user
 if (!isset($_SESSION['user']) && in_array($page, ['admin', 'user'])) {
     header('Location: ?page=login');
     exit();
 }
-
+ 
 // Render halaman
 ?>
 <!DOCTYPE html>
@@ -167,14 +167,21 @@ if (!isset($_SESSION['user']) && in_array($page, ['admin', 'user'])) {
                 <p>Platform terbaik untuk memesan jasa streaming game dari gamer favorit Anda!</p>
             </div>
         <?php elseif ($page === 'about'): ?>
-            <h1>About Us</h1>
-            <p>GameStream adalah platform modern untuk memesan jasa streaming game. Kami bekerja dengan streamer terbaik untuk memberikan pengalaman gaming yang seru!</p>
+            <h1>Tentang Kami</h1>
+            <p>GameStream adalah platform inovatif yang memungkinkan Anda menikmati hiburan streaming game kapan saja dan di mana saja. Kami bekerja sama dengan streamer profesional dan berbakat untuk memberikan pengalaman yang tak terlupakan.</p>
+            <p>Misi kami adalah menghubungkan gamer dengan streamer favorit mereka, menciptakan komunitas gaming yang inklusif, dan memberikan layanan berkualitas tinggi untuk penggemar game di seluruh dunia.</p>
+            <p>Ikuti kami di media sosial untuk mendapatkan informasi terkini, konten eksklusif, dan banyak lagi:</p>
+            <ul>
+                <li><a href="https://instagram.com/gamestream" target="_blank" style="color: #e1306c;">Instagram</a></li>
+                <li><a href="https://youtube.com/gamestream" target="_blank" style="color: #ff0000;">YouTube</a></li>
+                <li><a href="https://x.com/gamestream" target="_blank" style="color: #1DA1F2;">X (Twitter)</a></li>
+            </ul>
         <?php elseif ($page === 'gallery'): ?>
             <h1>Gallery</h1>
             <div class="gallery">
-                <img src="https://via.placeholder.com/300x200" alt="Game 1">
-                <img src="https://via.placeholder.com/300x200" alt="Game 2">
-                <img src="https://via.placeholder.com/300x200" alt="Game 3">
+                <img src="satu.jpg" alt="Game 1">
+                <img src="dua.jpg" alt="Game 2">
+                <img src="tiga.jpg" alt="Game 3">
             </div>
         <?php elseif ($page === 'content'): ?>
             <h1>Isi Pokok Website</h1>
