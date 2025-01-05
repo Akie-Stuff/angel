@@ -28,7 +28,7 @@ function login($username, $password, $users) {
 // Proses logout
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     session_destroy();
-    header('Location: ?page=login');
+    header('Location: ?page=landing');
     exit();
 }
 
@@ -54,10 +54,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
 }
 
 // Halaman yang diminta
-$page = $_GET['page'] ?? 'login';
+$page = $_GET['page'] ?? 'landing';
 
-// Jika user tidak login, arahkan ke halaman login
-if (!isset($_SESSION['user']) && $page !== 'login') {
+// Jika user tidak login, arahkan ke halaman login untuk admin/user
+if (!isset($_SESSION['user']) && $page !== 'landing' && $page !== 'login') {
     header('Location: ?page=login');
     exit();
 }
@@ -73,15 +73,25 @@ if (!isset($_SESSION['user']) && $page !== 'login') {
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
+            margin: 0;
+            padding: 0;
+            background: #1a1a2e;
+            color: #eaeaea;
         }
-        h1 {
-            color: #333;
+        header {
+            background: #0f3460;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            font-size: 24px;
+        }
+        section {
+            padding: 20px;
+            text-align: center;
         }
         a {
             display: inline-block;
-            margin-top: 20px;
+            margin: 10px 0;
             text-decoration: none;
             color: white;
             background: #007BFF;
@@ -110,27 +120,72 @@ if (!isset($_SESSION['user']) && $page !== 'login') {
         form button:hover {
             background: #218838;
         }
+        .hero {
+            background: url('https://via.placeholder.com/1500x400/0f3460/ffffff?text=Streaming+Game+Platform') no-repeat center center;
+            background-size: cover;
+            color: white;
+            padding: 100px 20px;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 3em;
+            margin: 0;
+        }
+        .hero p {
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+        footer {
+            background: #0f3460;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
-    <?php if ($page === 'login'): ?>
-        <h1>Login</h1>
-        <?php if (!empty($error)): ?>
-            <div class="error"><?= $error ?></div>
-        <?php endif; ?>
-        <form method="POST">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <button type="submit" name="login">Login</button>
-        </form>
+    <?php if ($page === 'landing'): ?>
+        <header>GameStream - Pemesanan Jasa Streaming Game</header>
+        <div class="hero">
+            <h1>Selamat Datang di GameStream</h1>
+            <p>Platform terbaik untuk memesan jasa streaming game dari gamer favorit Anda!</p>
+            <a href="?page=login">Login</a>
+        </div>
+        <section>
+            <h2>Apa yang Kami Tawarkan?</h2>
+            <p>Temukan streamer favorit Anda, nikmati pengalaman gaming yang seru, dan pesan jasa streaming game dengan mudah!</p>
+        </section>
+        <footer>© 2025 GameStream. All Rights Reserved.</footer>
+    <?php elseif ($page === 'login'): ?>
+        <header>Login ke GameStream</header>
+        <section>
+            <h1>Login</h1>
+            <?php if (!empty($error)): ?>
+                <div class="error"><?= $error ?></div>
+            <?php endif; ?>
+            <form method="POST">
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit" name="login">Login</button>
+            </form>
+        </section>
     <?php elseif ($page === 'admin'): ?>
-        <h1>Welcome, Admin!</h1>
-        <p>Ini adalah halaman admin.</p>
-        <a href="?action=logout">Logout</a>
+        <header>GameStream - Halaman Admin</header>
+        <section>
+            <h1>Welcome, Admin!</h1>
+            <p>Ini adalah halaman admin. Anda dapat mengelola data pengguna dan pemesanan di sini.</p>
+            <a href="?action=logout">Logout</a>
+        </section>
     <?php elseif ($page === 'user'): ?>
-        <h1>Welcome, User!</h1>
-        <p>Ini adalah halaman user biasa.</p>
-        <a href="?action=logout">Logout</a>
+        <header>GameStream - Halaman User</header>
+        <section>
+            <h1>Welcome, User!</h1>
+            <p>Terima kasih telah menggunakan jasa streaming kami. Selamat menikmati!</p>
+            <a href="?action=logout">Logout</a>
+        </section>
     <?php endif; ?>
 </body>
 </html>
